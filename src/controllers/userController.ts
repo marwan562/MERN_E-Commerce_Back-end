@@ -1,9 +1,12 @@
 import { StrictAuthProp, WithAuthProp } from "@clerk/clerk-sdk-node";
 import { NextFunction, Request, Response } from "express";
 import { clerkClient } from "@clerk/clerk-sdk-node";
+import { parseISO, startOfDay, endOfDay, subWeeks, subMonths, subMonths as subMonthsFunc, subYears } from "date-fns"; 
+
 import "dotenv/config";
 import AppError from "../utils/AppError";
 import User from "../models/UserModel";
+import Order from "../models/OrderModel";
 
 declare global {
   namespace Express {
@@ -46,6 +49,83 @@ export const createUser = async (
     }
 
     res.status(200).json({ user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getAllOrders = async (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.userId;
+  const { page = 1, pageSize = 10, status, duration } = req.query;
+
+  try {
+    if (!userId) {
+      return next(new AppError("User Id not found", 404));
+    }
+
+    const pageNumber = parseInt(page as string, 10);
+    const size = parseInt(pageSize as string, 10);
+
+    const query: any = { userId };
+
+    if (status) {
+      query["status"] = status;
+    }
+
+    if (duration) {
+      const now = new Date();
+      let startDate: Date;
+      let endDate: Date = endOfDay(now);
+
+      switch (duration) {
+        case "this week":
+          startDate = startOfDay(subWeeks(now, 1));
+          break;
+        case "this month":
+          startDate = startOfDay(subMonths(now, 1));
+          break;
+        case "last 3 months":
+          startDate = startOfDay(subMonths(now, 3));
+          break;
+        case "last 6 months":
+          startDate = startOfDay(subMonths(now, 6));
+          break;
+        case "this year":
+          startDate = startOfDay(new Date(now.getFullYear(), 0, 1));
+          break;
+        default:
+          startDate = startOfDay(new Date(0)); 
+      }
+
+      query["createdAt"] = { $gte: startDate, $lte: endDate };
+    }
+
+    const orders = await Order.find(query)
+      .skip((pageNumber - 1) * size)
+      .limit(size)
+      .sort({ createdAt: -1 });
+
+    const totalOrders = await Order.countDocuments(query);
+
+    if (!orders.length) {
+      return next(new AppError("No orders found", 404));
+    }
+
+    const totalPages = Math.ceil(totalOrders / size);
+
+    res.status(200).json({
+      orders,
+      pagination: {
+        totalOrders,
+        totalPages,
+        page: pageNumber,
+        pageSize: size,
+      },
+    });
   } catch (err) {
     next(err);
   }

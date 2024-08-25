@@ -6,7 +6,7 @@ type TError = {
   statusCode: number;
   status: string;
   errors: string[];
-  stack: string;
+  stack: {message:string};
 };
 
 const globalError = (
@@ -15,9 +15,7 @@ const globalError = (
   res: Response,
   next: NextFunction
 ) => {
-  if (err.stack) {
-    return res.status(401).send("Unauthenticated!");
-  }
+ 
 
   if (err.isOperational) {
     return res.status(err.statusCode).json({

@@ -14,7 +14,6 @@ export const addCartItem = async (
   try {
     const { productId } = req.body;
     const userId = req?.userId;
-    const sessionId = req.sessionID;
 
     if (!productId) {
       return next(new AppError("Product ID is required", 400));
@@ -33,7 +32,6 @@ export const addCartItem = async (
       // Create new cart item if not exists
       cartItem = await CartItem.create({
         userId,
-        sessionId,
         productId,
         quantity: 1,
       });
@@ -60,7 +58,7 @@ export const getCartItems = async (
     const userId = req.userId;
 
     const cartItems = await CartItem.find({
-      $or: [{ userId }, { sessionId: req.sessionID }],
+      userId
     }).populate("productId");
 
     res.status(200).json(cartItems);
@@ -81,7 +79,7 @@ export const updateCartItem = async (
   try {
     const { productId } = req.body;
     const userId = req.userId;
-    const sessionId = req.sessionID;
+    
 
     if (!userId) {
       return next(new AppError("User not authenticated", 401));
@@ -112,6 +110,8 @@ export const updateCartItem = async (
     const cartItems = await CartItem.find({
       userId,
     }).populate("productId");
+
+    
 
     res.status(200).json(cartItems);
   } catch (err) {
@@ -146,6 +146,7 @@ export const deleteItem = async (
       userId,
     }).populate("productId");
 
+    console.log(cartItems);
     res.status(200).json(cartItems);
   } catch (err) {
     next(err);

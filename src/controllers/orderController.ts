@@ -5,6 +5,38 @@ import ProductStat from "../models/ProductStat"; // Ensure this is the correct p
 import AppError from "../utils/AppError";
 import CartItem from "../models/CartItems";
 
+
+export const findOrder = async (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.userId;
+    const { orderId } = req.query;
+    if (!userId || !orderId) {
+      return next(new AppError("All fields are required.", 400));
+    }
+
+    
+    // Adjust your query to match ObjectId types
+    const order = await Order.findOne({
+      _id: orderId,
+      userId,
+    });
+
+    if (!order) {
+      return next(new AppError("Order Not Found.", 404));
+    }
+
+    res.status(200).send(order);
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+
 export const createOrder = async (
   req: Request & { userId?: string },
   res: Response,
@@ -29,6 +61,9 @@ export const createOrder = async (
         );
       }
       if (product.stock < item.quantity) {
+        product.stock = 0;
+        product.role = "Sale";
+        await product.save();
         return next(
           new AppError(`Insufficient stock for product ${item.productId}`, 400)
         );

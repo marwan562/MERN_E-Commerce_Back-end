@@ -1,7 +1,15 @@
 import { StrictAuthProp, WithAuthProp } from "@clerk/clerk-sdk-node";
 import { NextFunction, Request, Response } from "express";
 import { clerkClient } from "@clerk/clerk-sdk-node";
-import { parseISO, startOfDay, endOfDay, subWeeks, subMonths, subMonths as subMonthsFunc, subYears } from "date-fns"; 
+import {
+  parseISO,
+  startOfDay,
+  endOfDay,
+  subWeeks,
+  subMonths,
+  subMonths as subMonthsFunc,
+  subYears,
+} from "date-fns";
 
 import "dotenv/config";
 import AppError from "../utils/AppError";
@@ -13,6 +21,14 @@ declare global {
     interface Request extends StrictAuthProp {}
   }
 }
+
+// const getUser = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     const userId = 
+//   } catch (err) {
+//     next(err)
+//   }
+// };
 
 export const createUser = async (
   req: WithAuthProp<Request>,
@@ -98,7 +114,7 @@ export const getAllOrders = async (
           startDate = startOfDay(new Date(now.getFullYear(), 0, 1));
           break;
         default:
-          startDate = startOfDay(new Date(0)); 
+          startDate = startOfDay(new Date(0));
       }
 
       query["createdAt"] = { $gte: startDate, $lte: endDate };
@@ -111,10 +127,6 @@ export const getAllOrders = async (
 
     const totalOrders = await Order.countDocuments(query);
 
-    if (!orders.length) {
-      return next(new AppError("No orders found", 404));
-    }
-
     const totalPages = Math.ceil(totalOrders / size);
 
     res.status(200).json({
@@ -126,6 +138,28 @@ export const getAllOrders = async (
         pageSize: size,
       },
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateMyOrder = async (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return next(new AppError("order not found", 404));
+    }
+
+    order.status = "Cancelled";
+    await order.save();
+
+    res.status(200).send(order);
   } catch (err) {
     next(err);
   }

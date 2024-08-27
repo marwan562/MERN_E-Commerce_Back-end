@@ -13,7 +13,7 @@ import washlistRoute from "./routes/washlistRoute";
 import orderRoute from "./routes/orderRoute";
 import {
   ClerkExpressRequireAuth,
-  ClerkExpressWithAuth,
+
 } from "@clerk/clerk-sdk-node";
 import "dotenv/config";
 import "./db";
@@ -21,21 +21,38 @@ import "./db";
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const corsOptions = {
+  origin: 'http://localhost:3000', 
+
+};
+
 //configrations
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(helmet());
 app.use(morgan("common"));
 
 //routes
-app.use("/protected-endpoint", ClerkExpressRequireAuth(), userRoute);
-app.use("/user" , ClerkExpressRequireAuth() ,userRoute )
+app.use(
+  "/protected-endpoint",
+  ClerkExpressRequireAuth({
+    audience: "http://localhost:3000",
+    authorizedParties: ["http://localhost:3000"],
+    signInUrl: "/login",
+    onError: (error) => {
+      console.error("Authentication error:", error);
+    },
+  }),
+  userRoute
+);
+
+app.use("/user", userRoute);
 app.use("/category", categoryRoute);
 app.use("/product", productRoute);
 app.use("/cartitems", cartItemsRoute);
 app.use("/washlist", washlistRoute);
-app.use("/order", ClerkExpressRequireAuth(), orderRoute);
+app.use("/order", orderRoute);
 app.use(globalError);
 
 app.listen(PORT, () => {

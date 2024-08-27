@@ -28,8 +28,8 @@ const globalError = (
   console.error("ERROR 💥", err);
 
   res.status(500).json({
-    status: "error",
-    message: "Something went wrong!",
+    status: 500,
+    message: err.message,
   });
 };
 

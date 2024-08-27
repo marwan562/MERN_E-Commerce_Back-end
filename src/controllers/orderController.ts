@@ -4,7 +4,7 @@ import Product from "../models/ProductsModel";
 import ProductStat from "../models/ProductStat"; // Ensure this is the correct path
 import AppError from "../utils/AppError";
 import CartItem from "../models/CartItems";
-
+import { endOfDay, startOfDay, subMonths, subWeeks } from "date-fns";
 
 export const findOrder = async (
   req: Request & { userId?: string },
@@ -18,7 +18,6 @@ export const findOrder = async (
       return next(new AppError("All fields are required.", 400));
     }
 
-    
     // Adjust your query to match ObjectId types
     const order = await Order.findOne({
       _id: orderId,
@@ -35,7 +34,126 @@ export const findOrder = async (
   }
 };
 
+export const getAllOrders = async (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
+  const userId = req.userId;
+  const { page = 1, pageSize = 10, status, duration } = req.query;
 
+  try {
+    if (!userId) {
+      return next(new AppError("User Id not found", 404));
+    }
+
+    const pageNumber = parseInt(page as string, 10);
+    const size = parseInt(pageSize as string, 10);
+
+    // Initial query object
+    const query: any = { userId };
+
+    // Filter by status if provided
+    if (status) {
+      query.status = status;
+    }
+
+    // Filter by duration if provided
+    if (duration) {
+      const now = new Date();
+      let startDate: Date;
+      let endDate: Date = endOfDay(now);
+
+      switch (duration) {
+        case "this week":
+          startDate = startOfDay(subWeeks(now, 1));
+          break;
+        case "this month":
+          startDate = startOfDay(subMonths(now, 1));
+          break;
+        case "last 3 months":
+          startDate = startOfDay(subMonths(now, 3));
+          break;
+        case "last 6 months":
+          startDate = startOfDay(subMonths(now, 6));
+          break;
+        case "this year":
+          startDate = startOfDay(new Date(now.getFullYear(), 0, 1));
+          break;
+        default:
+          startDate = startOfDay(new Date(0)); // Default to a very early date if not matched
+      }
+
+      query.createdAt = { $gte: startDate, $lte: endDate };
+    }
+
+    // Fetching orders with pagination and sorting by creation date
+    const orders = await Order.find(query)
+      .skip((pageNumber - 1) * size)
+      .limit(size)
+      .sort({ createdAt: -1 })
+      .lean(); // Use lean() to get plain JavaScript objects
+
+    // Count the total number of orders for pagination details
+    const totalOrders = await Order.countDocuments(query);
+    const totalPages = Math.ceil(totalOrders / size);
+
+    // Send the response with orders and pagination
+    res.status(200).json({
+      orders, // Directly use orders without manual mapping
+      pagination: {
+        totalOrders,
+        totalPages,
+        page: pageNumber,
+        pageSize: size,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
+export const updateOrderStatus = async (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
+  const { orderId } = req.params;
+  const { status } = req.body; 
+
+  try {
+  
+    if (!orderId) {
+      return next(new AppError("Order ID is required", 400));
+    }
+
+    if (!status) {
+      return next(new AppError("Status is required", 400));
+    }
+
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return next(new AppError("Order not found", 404));
+    }
+
+    const validStatuses = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+    if (!validStatuses.includes(status)) {
+      return next(new AppError("Invalid status", 400));
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.status(200).json({
+      message: "Order status updated successfully",
+      order,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 
 export const createOrder = async (
   req: Request & { userId?: string },

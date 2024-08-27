@@ -11,6 +11,7 @@ import productRoute from "./routes/productRoute";
 import cartItemsRoute from "./routes/cartItemsRoute";
 import washlistRoute from "./routes/washlistRoute";
 import orderRoute from "./routes/orderRoute";
+//check token from clerk
 import {
   ClerkExpressRequireAuth,
 

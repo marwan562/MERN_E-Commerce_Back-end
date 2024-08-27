@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.get("/findOrder",checkJwt , findOrder)
 router.get("/getAllOrders",checkJwt , getAllOrders)
-router.patch("/updateOrder",  checkJwt, updateOrderStatus);
+router.patch("/updateOrder/:orderId",  checkJwt, updateOrderStatus);
 router.post("/createOrder",  checkJwt, createOrder);
 
-export default router;
+export default router;  

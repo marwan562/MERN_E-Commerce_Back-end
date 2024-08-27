@@ -50,15 +50,12 @@ export const getAllOrders = async (
     const pageNumber = parseInt(page as string, 10);
     const size = parseInt(pageSize as string, 10);
 
-    // Initial query object
     const query: any = { userId };
 
-    // Filter by status if provided
     if (status) {
       query.status = status;
     }
 
-    // Filter by duration if provided
     if (duration) {
       const now = new Date();
       let startDate: Date;
@@ -81,26 +78,23 @@ export const getAllOrders = async (
           startDate = startOfDay(new Date(now.getFullYear(), 0, 1));
           break;
         default:
-          startDate = startOfDay(new Date(0)); // Default to a very early date if not matched
+          startDate = startOfDay(new Date(0)); 
       }
 
       query.createdAt = { $gte: startDate, $lte: endDate };
     }
 
-    // Fetching orders with pagination and sorting by creation date
     const orders = await Order.find(query)
       .skip((pageNumber - 1) * size)
       .limit(size)
       .sort({ createdAt: -1 })
-      .lean(); // Use lean() to get plain JavaScript objects
+      .lean(); 
 
-    // Count the total number of orders for pagination details
     const totalOrders = await Order.countDocuments(query);
     const totalPages = Math.ceil(totalOrders / size);
 
-    // Send the response with orders and pagination
     res.status(200).json({
-      orders, // Directly use orders without manual mapping
+      orders,
       pagination: {
         totalOrders,
         totalPages,
@@ -147,7 +141,6 @@ export const updateOrderStatus = async (
     await order.save();
 
     res.status(200).json({
-      message: "Order status updated successfully",
       order,
     });
   } catch (err) {

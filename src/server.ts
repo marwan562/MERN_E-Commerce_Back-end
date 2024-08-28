@@ -11,11 +11,11 @@ import productRoute from "./routes/productRoute";
 import cartItemsRoute from "./routes/cartItemsRoute";
 import washlistRoute from "./routes/washlistRoute";
 import orderRoute from "./routes/orderRoute";
-//check token from clerk
-import {
-  ClerkExpressRequireAuth,
+import adminDashboardRoute from "./routes/adminDashboardRoute";
 
-} from "@clerk/clerk-sdk-node";
+//cloudinary config 
+import "./config/cloudinary-config"
+
 import "dotenv/config";
 import "./db";
 
@@ -23,8 +23,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: 'http://localhost:3000', 
-
+  origin: "http://localhost:3000",
 };
 
 //configrations
@@ -37,14 +36,6 @@ app.use(morgan("common"));
 //routes
 app.use(
   "/protected-endpoint",
-  ClerkExpressRequireAuth({
-    audience: "http://localhost:3000",
-    authorizedParties: ["http://localhost:3000"],
-    signInUrl: "/login",
-    onError: (error) => {
-      console.error("Authentication error:", error);
-    },
-  }),
   userRoute
 );
 
@@ -54,6 +45,7 @@ app.use("/product", productRoute);
 app.use("/cartitems", cartItemsRoute);
 app.use("/washlist", washlistRoute);
 app.use("/order", orderRoute);
+app.use("/admin-dashboard" , adminDashboardRoute)
 app.use(globalError);
 
 app.listen(PORT, () => {

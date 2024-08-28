@@ -18,7 +18,7 @@ export const checkJwt = async (
     if (authorization && authorization.startsWith("Bearer ")) {
       const token = authorization.split(" ")[1];
       const decoded = jwt.decode(token);
-      const authId = (decoded as any).sub;
+      const authId = (decoded as any)?.sub;
 
       // Assuming your JWT payload contains a userId
       const user = await User.findOne({ authId });

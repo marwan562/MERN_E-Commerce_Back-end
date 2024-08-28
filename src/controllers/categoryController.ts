@@ -17,11 +17,8 @@ export const getAll = async (
 
     return res.status(200).json(categories);
   } catch (err) {
-    const error =
-      err instanceof AppError
-        ? err
-        : new AppError("Internal Server Error", 500);
-    next(error);
+  
+    next(err);
   }
 };
 

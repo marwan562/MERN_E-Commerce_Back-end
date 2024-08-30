@@ -19,7 +19,7 @@ const clerkMiddleware =  ClerkExpressRequireAuth({
 })
 
 router.post("/createUser" ,clerkMiddleware, createUser);
-router.get("/getAllOrders" , checkJwt, getAllOrders);
+router.get("/getAllOrders/:id" , checkJwt, getAllOrders);
 router.patch("/myOrder/:id", checkJwt, updateMyOrder);
 
 export default router;

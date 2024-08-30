@@ -30,8 +30,8 @@ export const createCategory = async (
     const image = req.file;
     const { title } = req.body;
 
-    if (!image || !title) {
-      return next(new AppError("Feilds is required.", 400));
+    if (!image) {
+      return next(new AppError("imageFile is require.", 400));
     }
 
     const uploadResponse = await uploadImageUrl(image);

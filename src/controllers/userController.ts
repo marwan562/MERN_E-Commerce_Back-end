@@ -24,7 +24,7 @@ declare global {
 
 // const getUser = async (req: Request, res: Response, next: NextFunction) => {
 //   try {
-//     const userId = 
+//     const userId =
 //   } catch (err) {
 //     next(err)
 //   }
@@ -71,22 +71,22 @@ export const createUser = async (
 };
 
 export const getAllOrders = async (
-  req: Request & { userId?: string },
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const userId = req.userId;
+  const { id } = req.params;
   const { page = 1, pageSize = 10, status, duration } = req.query;
 
   try {
-    if (!userId) {
+    if (!id) {
       return next(new AppError("User Id not found", 404));
     }
 
     const pageNumber = parseInt(page as string, 10);
     const size = parseInt(pageSize as string, 10);
 
-    const query: any = { userId };
+    const query: any = { userId: id };
 
     if (status) {
       query["status"] = status;

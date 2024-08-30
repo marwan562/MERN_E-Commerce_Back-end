@@ -7,7 +7,24 @@ import {
   updateCategory,
   removeCategory,
 } from "../controllers/categoriesForAdmin";
-import { getAllProducts } from "../controllers/productsForAdmin";
+
+import {
+  getAllProducts,
+  createProduct,
+  deleteProduct,
+  updateProduct,
+} from "../controllers/productsForAdmin";
+
+import {
+  getProductStatsById,
+  productStatsByCategory,
+  overViewDashboard,
+} from "../controllers/productStatsController";
+import {
+  deleteUser,
+  getAllCustomers,
+  updateRoleCustomer,
+} from "../controllers/customersController";
 
 const router = express.Router();
 
@@ -23,7 +40,27 @@ router.patch(
   uploadImageMulter,
   updateCategory
 );
+
 //proudct for admin
 router.get("/products", checkJwt, getAllProducts);
+router.post("/createProduct", checkJwt, uploadImageMulter, createProduct);
+router.patch("/updateProduct/:id", checkJwt, uploadImageMulter, updateProduct);
+router.delete("/deleteProduct/:id", checkJwt, deleteProduct);
+
+//productStats
+router.get("/productStats/:id", checkJwt, getProductStatsById);
+router.get(
+  "/proudctStatsByCategory/:categoryId",
+  checkJwt,
+  productStatsByCategory
+);
+
+//overview admin dashboard
+router.get("/overview", checkJwt, overViewDashboard);
+
+//customers for admin dashboard
+router.get("/customers", checkJwt, getAllCustomers);
+router.patch("/updateUser/:id", checkJwt, updateRoleCustomer);
+router.delete("/deleteUser/:id", checkJwt, deleteUser);
 
 export default router;

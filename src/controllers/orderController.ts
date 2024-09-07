@@ -12,16 +12,14 @@ export const findOrder = async (
   next: NextFunction
 ) => {
   try {
-    const userId = req.userId;
     const { orderId } = req.query;
-    if (!userId || !orderId) {
+    if ( !orderId) {
       return next(new AppError("All fields are required.", 400));
     }
 
     // Adjust your query to match ObjectId types
     const order = await Order.findOne({
       _id: orderId,
-      userId,
     });
 
     if (!order) {

@@ -15,20 +15,13 @@ import "dotenv/config";
 import AppError from "../utils/AppError";
 import User from "../models/UserModel";
 import Order from "../models/OrderModel";
+import { uploadImageUrl } from "../utils/uploadImageUrl";
 
 declare global {
   namespace Express {
     interface Request extends StrictAuthProp {}
   }
 }
-
-// const getUser = async (req: Request, res: Response, next: NextFunction) => {
-//   try {
-//     const userId =
-//   } catch (err) {
-//     next(err)
-//   }
-// };
 
 export const createUser = async (
   req: WithAuthProp<Request>,
@@ -59,6 +52,8 @@ export const createUser = async (
         lastName: clerkUser.lastName,
         email,
         imageUrl: clerkUser.imageUrl,
+        phoneMobile: "",
+        role: "user",
       });
 
       return res.status(201).json({ user });
@@ -162,5 +157,60 @@ export const updateMyOrder = async (
     res.status(200).send(order);
   } catch (err) {
     next(err);
+  }
+};
+
+export const updateUser = async (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
+  const uesrId = req.userId;
+  const { firstName, lastName, email, phoneMobile } = req.body;
+  
+  try {
+    const user = await User.findById(uesrId);
+
+    if (!user) {
+      return next(new AppError("uesr not found ", 404));
+    }
+
+    if (user?.firstName) user.firstName = firstName;
+    if (user?.lastName) user.lastName = lastName;
+    if (user?.email) user.email = email;
+    if (user?.phoneMobile) user.phoneMobile = phoneMobile;
+
+    await user.save();
+
+    res.status(200).send({ user });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateImageProfile = async (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
+  const image = req.file;
+  const userId = req.userId;
+  try {
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return next(new AppError("uesr not found ", 404));
+    }
+
+    if (image) {
+      const url = await uploadImageUrl(image);
+      user.imageUrl = url;
+    }
+
+    await user.save();
+
+    res.status(200).send({ imageUrl: user.imageUrl });
+  } catch (Err) {
+    next(Err);
   }
 };

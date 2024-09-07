@@ -11,6 +11,7 @@ import productRoute from "./routes/productRoute";
 import cartItemsRoute from "./routes/cartItemsRoute";
 import washlistRoute from "./routes/washlistRoute";
 import orderRoute from "./routes/orderRoute";
+import mailsRoute from "./routes/mailsRoute";
 import adminDashboardRoute from "./routes/adminDashboardRoute";
 
 //cloudinary config
@@ -42,6 +43,7 @@ app.use("/product", productRoute);
 app.use("/cartitems", cartItemsRoute);
 app.use("/washlist", washlistRoute);
 app.use("/order", orderRoute);
+app.use("/mails", mailsRoute);
 app.use("/admin-dashboard", adminDashboardRoute);
 app.use(globalError);
 

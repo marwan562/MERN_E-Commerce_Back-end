@@ -20,6 +20,8 @@ export const checkJwt = async (
       const decoded = jwt.decode(token);
       const authId = (decoded as any)?.sub;
 
+      console.log(authId)
+
       // Assuming your JWT payload contains a userId
       const user = await User.findOne({ authId });
 

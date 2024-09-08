@@ -1,5 +1,13 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+type TReplies = {
+  user: any;
+  isRead: boolean;
+  userId: mongoose.Types.ObjectId;
+  content: string;
+  timestamp: Date;
+};
+
 interface IEmail extends Document {
   orderId: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
@@ -9,7 +17,19 @@ interface IEmail extends Document {
   status: "read" | "unread";
   mailType: "orderConfigration" | "shippingNotification" | "customerInquiry";
   image: string;
+  replies: TReplies[];
 }
+
+const repliesSchema = {
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  isRead: { type: Boolean, default: false },
+  content: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+};
 
 const mailSchema = new Schema<IEmail>(
   {
@@ -45,6 +65,7 @@ const mailSchema = new Schema<IEmail>(
       required: true,
     },
     image: { type: String },
+    replies: [repliesSchema],
   },
   {
     timestamps: true,

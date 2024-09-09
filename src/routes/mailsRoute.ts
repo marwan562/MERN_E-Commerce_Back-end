@@ -5,6 +5,7 @@ import {
   deleteMyMail,
   updateMyMail,
   findMyEmailByOrderId,
+  getAllMailsReceived,
 } from "../controllers/mailsController";
 import { upload } from "../config/multer-config";
 import { checkJwt } from "../middlewares/checkJwt";
@@ -19,4 +20,6 @@ router.delete("/removeMyMail/:id", checkJwt, deleteMyMail);
 router.patch("/:id", checkJwt, uploadImageMulter, updateMyMail);
 router.post("/", checkJwt, uploadImageMulter, createMyMail);
 
+//get all mails for user
+router.get("/getAllMailsReceived" , checkJwt, getAllMailsReceived);
 export default router;

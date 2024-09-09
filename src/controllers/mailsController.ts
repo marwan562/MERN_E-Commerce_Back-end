@@ -184,3 +184,78 @@ export const findMyEmailByOrderId = async (
     next(err);
   }
 };
+
+export const getAllMailsReceived = async (
+  req: Request & { userId?: string },
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const userId = req.userId;
+
+    if (!userId) {
+      return next(new AppError("User ID is required", 400));
+    }
+
+    const {
+      page = 1,
+      pageSize = 10,
+      search = "",
+      filterMailType,
+      filterStatus,
+    } = req.query;
+
+    const pageNumber = parseInt(page.toString(), 10);
+    const pageSizeNumber = parseInt(pageSize.toString(), 10);
+    const searchRegExp = new RegExp(search.toString(), "i");
+
+    let query: any = { userId, adminId: { $exists: true } };
+
+    if (search) {
+      query["subject"] = searchRegExp; 
+    }
+
+    if (filterMailType && filterMailType !== "all") {
+      query["mailType"] = filterMailType; 
+    }
+
+    if (filterStatus && filterStatus !== "all") {
+      query["status"] = filterStatus; 
+    }
+
+    const mails = await Mail.find(query)
+      .populate("userId adminId")
+      .populate({ path: "replies.user", select: "firstName lastName imageUrl isRead role createdAt" })
+      .limit(pageSizeNumber)
+      .skip((pageNumber - 1) * pageSizeNumber)
+      .exec();
+
+    const totalMails = await Mail.countDocuments(query);
+    const totalPages = Math.ceil(totalMails / pageSizeNumber);
+
+    if (!mails || mails.length === 0) {
+      return res.status(200).json({
+        mails: [],
+        pagination: {
+          page: pageNumber,
+          pageSize: pageSizeNumber,
+          totalMails: 0,
+          totalPages: 1,
+        },
+      });
+    }
+
+    res.status(200).json({
+      mails,
+      pagination: {
+        page: pageNumber,
+        pageSize: pageSizeNumber,
+        totalMails,
+        totalPages,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+

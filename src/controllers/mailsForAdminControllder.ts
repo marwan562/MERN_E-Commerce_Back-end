@@ -132,8 +132,7 @@ export const replayMailToUser = async (
     next(error);
   }
 };
-
-export const updateReadMail = async (
+export const updateReadStatus = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -142,10 +141,12 @@ export const updateReadMail = async (
   const { userId } = req.body;
 
   try {
-    const mail = await Mail.findById(mailId).populate("userId").populate({
-      path: "replies.user",
-      select: "firstName lastName imageUrl isRead role createdAt",
-    });
+    const mail = await Mail.findById(mailId)
+      .populate("userId")
+      .populate({
+        path: "replies.user",
+        select: "firstName lastName imageUrl isRead role createdAt",
+      });
 
     if (!mail) {
       return res.status(404).json({ message: "Mail not found" });
@@ -158,18 +159,23 @@ export const updateReadMail = async (
         if (reply.user._id.equals(mail.userId)) {
           reply.isRead = true;
         }
+        else if (reply.user._id.equals(mail.adminId)) {
+          reply.isRead = false;
+        }
       } else {
         if (reply.user._id.equals(mail.adminId)) {
+          reply.isRead = true;
+        }
+        else if (reply.user._id.equals(mail.userId)) {
           reply.isRead = false;
         }
       }
     });
 
-    mail.status = "read";
-
     await mail.save();
 
     res.status(200).json({ mail });
+    
   } catch (err) {
     next(err);
   }

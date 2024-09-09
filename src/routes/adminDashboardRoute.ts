@@ -25,7 +25,7 @@ import {
   getAllCustomers,
   updateRoleCustomer,
 } from "../controllers/customersController";
-import { getAllMails,replayMailToUser,updateReadMail } from "../controllers/mailsForAdminControllder";
+import { getAllMails,replayMailToUser,updateReadStatus } from "../controllers/mailsForAdminControllder";
 
 const router = express.Router();
 
@@ -66,7 +66,7 @@ router.delete("/deleteUser/:id", checkJwt, deleteUser);
 
 //mail fro admin dashboard
 router.get("/mails",checkJwt, getAllMails)
-router.patch("/mails/read/:mailId", checkJwt , updateReadMail)
+router.patch("/mails/read/:mailId", checkJwt , updateReadStatus)
 router.post("/mails/add-reply/:mailId",checkJwt , replayMailToUser)
 
 export default router;

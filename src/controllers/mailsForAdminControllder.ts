@@ -172,10 +172,12 @@ export const updateReadStatus = async (
       }
     });
 
+    mail.status = "read"
+
     await mail.save();
 
     res.status(200).json({ mail });
-    
+
   } catch (err) {
     next(err);
   }

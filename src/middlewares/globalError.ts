@@ -2,11 +2,11 @@ import { NextFunction, Request, Response } from "express";
 
 type TError = {
   message: any;
-  isOperational: boolean;
+  isOperational?: boolean;
   statusCode: number;
-  status: string;
-  errors: string[];
-  stack: {message:string};
+  status?: string;
+  errors?: string[];
+  stack?: string; 
 };
 
 const globalError = (

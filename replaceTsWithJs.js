@@ -21,6 +21,10 @@ function ensureRelativeJsImportsInFiles(dir) {
       let content = fs.readFileSync(filePath, 'utf-8');
       // Ensure all relative import paths end with .js
       content = content.replace(/import\s+[^'"]+\s+from\s+['"](\.\/|\.\.\/.*?)([^'"]*)['"]/g, (match, prefix, p1) => {
+        // Skip specific imports
+        if (match.includes('./config/cloudinary-config') || match.includes('./db')) {
+          return match; // Don't modify these imports
+        }
         if (!p1.endsWith('.js') && !p1.includes('.')) {
           return `${match.split('from')[0].trim()} from '${prefix}${p1}.js'`;
         }
@@ -32,4 +36,4 @@ function ensureRelativeJsImportsInFiles(dir) {
 }
 
 ensureRelativeJsImportsInFiles(distDir);
-console.log('Ensured all relative import paths end with .js for all .js files.');
+console.log('Ensured all relative import paths end with .js for all .js files, excluding specific cases.');

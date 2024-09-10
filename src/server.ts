@@ -24,8 +24,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: process.env.BASE_URL_FRONT_END,
 };
+
+// BASE_URL_FRONT_END
 
 //configrations
 app.use(express.json({ limit: "10mb" }));

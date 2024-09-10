@@ -9,14 +9,15 @@ import {
 import { checkJwt } from "../middlewares/checkJwt";
 import { ClerkExpressRequireAuth } from "@clerk/clerk-sdk-node";
 import { upload } from "../config/multer-config";
+import "dotenv/config"
 
 const router = express.Router();
 
 const uploadImageMulter = upload.single("imageFile");
 
 const clerkMiddleware = ClerkExpressRequireAuth({
-  audience: "http://localhost:3000",
-  authorizedParties: ["http://localhost:3000"],
+  audience: process.env.BASE_URL_FRONT_END,
+  authorizedParties: [process.env.BASE_URL_FRONT_END as string],
   signInUrl: "/login",
   onError: (error) => {
     console.error("Authentication error:", error);

@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import AppError from "../utils/AppError";
-import Product from "../models/ProductsModel";
 import CartItem from "../models/CartItems";
 interface TReq extends Request {
   userId?: string;

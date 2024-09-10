@@ -3,7 +3,7 @@ import { NextFunction, Request, Response } from "express";
 type TError = {
   message: any;
   isOperational?: boolean;
-  statusCode?: number;
+  statusCode: number;
   status?: string;
   errors?: string[];
   stack?: string; 
@@ -18,7 +18,7 @@ const globalError = (
  
 
   if (err.isOperational) {
-    return res.status(err?.statusCode).json({
+    return res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
       errors: err.errors,
